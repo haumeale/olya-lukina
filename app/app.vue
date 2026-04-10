@@ -1,8 +1,5 @@
 <template>
 	<div>
-		<NuxtRouteAnnouncer />
-		<NuxtWelcome />
-
 		<UiButton
 			class="bg-primary text-white"
 			@click="() => $toast('Hello world!')"
@@ -11,3 +8,4 @@
 		</UiButton>
 	</div>
 </template>
+

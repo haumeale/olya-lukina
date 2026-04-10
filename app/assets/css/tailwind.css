@@ -1,12 +1,9 @@
 @import url("https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&display=swap");
-@import url("tailwindcss");
-@import url("tw-animate-css");
+@import "tailwindcss";
+@import "tw-animate-css";
 
 @custom-variant dark (&:is(.dark *));
 
-.body {
-	background-color: #f0f0f0;
-}
 
 @theme inline {
 	--radius-sm: calc(var(--radius) - 4px);
