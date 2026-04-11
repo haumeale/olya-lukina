@@ -4,7 +4,7 @@
 			class="bg-primary text-white"
 			@click="() => $toast('Hello world!')"
 		>
-			Click me
+		BIM BIM
 		</UiButton>
 	</div>
 </template>
