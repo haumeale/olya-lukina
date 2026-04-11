@@ -1,7 +1,6 @@
 {
   "$schema": "https://shadcn-vue.com/schema.json",
   "style": "new-york",
-  "base": "reka",
   "font": "geist",
   "typescript": true,
   "tailwind": {
@@ -15,7 +14,7 @@
   "aliases": {
     "components": "@/shared",
     "utils": "@/lib/utils",
-    "ui": "@/shared/ui",
+    "ui": "@/shared/Shadcn",
     "lib": "@/lib",
     "composables": "@/composables"
   },

@@ -2,7 +2,7 @@
 import tailwindcss from "@tailwindcss/vite";
 const isDev = process.env.NODE_ENV === "development";
 export default defineNuxtConfig({
-	ssr: true,
+	ssr: false,
 	devtools: { enabled: isDev },
 	runtimeConfig: {
 		public: {
@@ -13,7 +13,7 @@ export default defineNuxtConfig({
 		pageTransition: { name: "page", mode: "default" },
 		layoutTransition: { name: "layout", mode: "default" },
 	},
-	css: ["./app/assets/css/tailwind.css"],
+	css: ["~/assets/css/tailwind.css"],
 	vite: {
 		plugins: [tailwindcss()],
 	},
@@ -37,14 +37,14 @@ export default defineNuxtConfig({
 		 * Prefix for all the imported component.
 		 * @default "Ui"
 		 */
-		prefix: "",
+		prefix: "Shadcn",
 		/**
 		 * Directory that the component lives in.
 		 * Will respect the Nuxt aliases.
 		 * @link https://nuxt.com/docs/api/nuxt-config#alias
 		 * @default "@/shared/ui"
 		 */
-		componentDir: "@/shared/ui",
+		componentDir: "@/shared/Shadcn",
 	},
 
 	pinia: {
@@ -53,7 +53,7 @@ export default defineNuxtConfig({
 	eslint: {},
 	imports: {
 		autoImport: true,
-		dirs: ["~/components", "~/features/**/*", "~/widgets/**/*", "~/stores/**"],
+		dirs: ["~/components", "~/features/**/*", "~/widgets/**/*", "~/stores/**", "~/shared/**/*"],
 	},
 	colorMode: {
 		preference: "system", // default value of $colorMode.preference
