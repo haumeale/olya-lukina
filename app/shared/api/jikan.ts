@@ -7,11 +7,12 @@ type AnimeParams = {
   status?: string
   order_by?: string
   sort?: "asc" | "desc"
+  signal?: AbortSignal
 }
 
 export const jikanApi = {
 
-  async getAnime(params: AnimeParams = {}) {
+  async getAnime(params: AnimeParams = {}): Promise<{ data?: any[] }> {
     return await $fetch(`${BASE_URL}/anime`, {
       query: {
         page: params.page ?? 1,
@@ -21,6 +22,7 @@ export const jikanApi = {
         order_by: params.order_by ?? "popularity",
         sort: params.sort ?? "desc",
       },
+      signal: params.signal,
     })
   },
 

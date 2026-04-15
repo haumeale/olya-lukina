@@ -26,7 +26,7 @@ export function useAnimeSearch() {
         signal: controller.signal,
       })
 
-      const data = res?.data ?? []
+      const data = Array.isArray(res?.data) ? res.data : []
 
       const mapped = data.map(mapAnime)
 
