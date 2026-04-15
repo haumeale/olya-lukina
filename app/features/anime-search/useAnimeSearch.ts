@@ -1,43 +1,45 @@
+import { ref, watch } from "vue"
 import { jikanApi } from "@/shared/api/jikan"
 import { mapAnime } from "@/entities/anime/model/mapper"
 import { useDebounce } from "@/shared/lib/useDebounce"
-import { rankAnime } from "@/features/anime-search/model/rankAnime"
 
 export function useAnimeSearch() {
   const page = ref(1)
   const search = ref("")
-  const loading = ref(false)
   const list = ref<any[]>([])
+  const loading = ref(false)
+
+  let controller: AbortController | null = null
 
   const load = async () => {
     if (loading.value) return
+
+    controller?.abort()
+    controller = new AbortController()
+
     loading.value = true
 
-    const res = await jikanApi.getAnime({
-      page: page.value,
-      q: search.value || undefined,
-    })
+    try {
+      const res = await jikanApi.getAnime({
+        page: page.value,
+        q: search.value || undefined,
+        signal: controller.signal,
+      })
 
-    // маппим
-    const mapped = res.data.map(mapAnime)
+      const data = res?.data ?? []
 
-    //сортируем 
-    const sorted = search.value
-      ? mapped.sort(
-          (a, b) =>
-            rankAnime(a.title, search.value) -
-            rankAnime(b.title, search.value)
-        )
-      : mapped
+      const mapped = data.map(mapAnime)
 
-    // обновляем список
-    if (page.value === 1) {
-      list.value = sorted
-    } else {
-      list.value.push(...sorted)
+      if (page.value === 1) {
+        list.value = mapped
+      } else {
+        list.value.push(...mapped)
+      }
+    } catch (e) {
+      console.error("API ERROR:", e)
+    } finally {
+      loading.value = false
     }
-
-    loading.value = false
   }
 
   const resetAndSearch = async () => {
@@ -46,9 +48,9 @@ export function useAnimeSearch() {
     await load()
   }
 
-  const debouncedSearch = useDebounce(resetAndSearch, 800)
+  const debounced = useDebounce(resetAndSearch, 600)
 
-  watch(search, debouncedSearch)
+  watch(search, () => debounced())
 
   const loadMore = async () => {
     if (loading.value) return
