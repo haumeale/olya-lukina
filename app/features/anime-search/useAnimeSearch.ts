@@ -46,7 +46,7 @@ export function useAnimeSearch() {
     await load()
   }
 
-  const debouncedSearch = useDebounce(resetAndSearch, 400)
+  const debouncedSearch = useDebounce(resetAndSearch, 800)
 
   watch(search, debouncedSearch)
 

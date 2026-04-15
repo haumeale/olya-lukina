@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useAnimeSearch } from "@/features/anime-search/useAnimeSearch"
 import { useInfiniteScroll } from "@/shared/lib/useInfiniteScroll"
+import { Card, CardContent } from "@/shared/Shadcn/card"
 
 const {
   list,
