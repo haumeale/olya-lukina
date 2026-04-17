@@ -18,47 +18,46 @@ export function useAnimeSearch() {
       .split(/\s+/)
       .filter(Boolean)
 
-  const getNormalizedTitles = (item: any) =>
+  const getTitles = (item: any) =>
     [item.title, ...(item.titles?.map((t: any) => t.title) ?? [])]
-      .filter((title): title is string => Boolean(title))
+      .filter(Boolean)
       .map(normalize)
 
   const getSearchScore = (item: any, query: string) => {
     const tokens = tokenize(query)
-    if (tokens.length === 0) return 1
+    if (!tokens.length) return 0
 
-    const titles = getNormalizedTitles(item)
-    if (titles.length === 0) return 0
+    const titles = getTitles(item)
+    if (!titles.length) return 0
 
-    const fullQuery = tokens.join(" ")
-    if (titles.some((title) => title === fullQuery)) return 120
-    if (titles.some((title) => title.includes(fullQuery))) return 110
+    const full = tokens.join(" ")
 
-    const scoreForToken = (token: string) =>
-      Math.max(
-        ...titles.map((title) => {
-          if (title === token) return 30
-          if (title.startsWith(token)) return 25
-          if (title.includes(` ${token} `)) return 22
-          if (title.includes(token)) return 18
-          return 0
-        }),
-        0,
-      )
+    // приоритет полной фразы
+    if (titles.some(t => t === full)) return 100
+    if (titles.some(t => t.includes(full))) return 90
 
-    const numericTokens = tokens.filter((token) => /^\d+$/.test(token))
-    const textTokens = tokens.filter((token) => !/^\d+$/.test(token))
-    const tokenScores = tokens.map((token) => scoreForToken(token))
+    let score = 0
+    let matched = 0
 
-    if (numericTokens.length && textTokens.length) {
-      const numericMatch = numericTokens.some((token) => scoreForToken(token) > 0)
-      const textMatch = textTokens.some((token) => scoreForToken(token) > 0)
-      if (!numericMatch || !textMatch) return 0
+    for (const token of tokens) {
+      let best = 0
+
+      for (const title of titles) {
+        if (title === token) best = Math.max(best, 30)
+        else if (title.startsWith(token)) best = Math.max(best, 25)
+        else if (title.includes(token)) best = Math.max(best, 15)
+      }
+
+      if (best > 0) {
+        matched++
+        score += best
+      }
     }
 
-    const matchedTokens = tokenScores.filter((score) => score > 0).length
-    const baseScore = tokenScores.reduce((sum, score) => sum + score, 0)
-    return matchedTokens ? baseScore + (matchedTokens === tokens.length ? 20 : 0) : 0
+    // бонус если совпали все слова
+    if (matched === tokens.length) score += 20
+
+    return score
   }
 
   const load = async () => {
@@ -78,11 +77,17 @@ export function useAnimeSearch() {
       })
 
       const data = Array.isArray(res?.data) ? res.data : []
-      const scored = data
-        .map((item) => ({ item, score: getSearchScore(item, search.value) }))
-        .filter(({ score }) => score > 0)
-        .sort((a, b) => b.score - a.score)
-        .map(({ item }) => item)
+
+      const scored = search.value
+        ? data
+            .map((item) => ({
+              item,
+              score: getSearchScore(item, search.value),
+            }))
+            .filter(({ score }) => score > 0)
+            .sort((a, b) => b.score - a.score)
+            .map(({ item }) => item)
+        : data
 
       const mapped = scored.map(mapAnime)
 
