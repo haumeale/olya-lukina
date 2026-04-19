@@ -5,7 +5,9 @@ export function useInfiniteScroll(callback: () => void) {
 
   onMounted(() => {
     observer = new IntersectionObserver(([entry]) => {
-      if (entry.isIntersecting) callback()
+      if (entry.isIntersecting) {
+        callback()
+      }
     })
 
     if (target.value) observer.observe(target.value)

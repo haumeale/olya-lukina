@@ -10,7 +10,7 @@ export default defineNuxtConfig({
 		},
 	},
 	app: {
-		pageTransition: { name: "page", mode: "default" },
+		pageTransition: { name: "page", mode: "out-in" },
 		layoutTransition: { name: "layout", mode: "default" },
 	},
 	css: ["~/assets/css/tailwind.css"],
@@ -50,6 +50,7 @@ export default defineNuxtConfig({
 	pinia: {
 		storesDirs: ["./stores/**", "./stores"],
 	},
+	plugins: ["@/plugins/fetch.ts"],
 	eslint: {},
 	imports: {
 		autoImport: true,
