@@ -11,6 +11,7 @@ import {
 const animeCompose = useAnime();
 const search = ref("");
 const isPending = ref(false);
+const showScrollTop = ref(false);
 const filters = ref({
 	genres: "",
 	limit: "24",
@@ -27,6 +28,22 @@ const activeFilters = () => ({ ...filters.value, q: search.value });
 const { target } = useInfiniteScroll(() =>
 	animeCompose.getInfiniteList(activeFilters()),
 );
+
+const onScroll = () => {
+	showScrollTop.value = window.pageYOffset > 400;
+};
+
+const scrollToTop = () => {
+	window.scrollTo({ top: 0, behavior: "smooth" });
+};
+
+onMounted(() => {
+	window.addEventListener("scroll", onScroll, { passive: true });
+});
+
+onBeforeUnmount(() => {
+	window.removeEventListener("scroll", onScroll);
+});
 
 onBeforeMount(async () => {
 	try {
@@ -194,6 +211,15 @@ watch(
 			Loading more...
 		</p>
 		<div ref="target" class="h-10"></div>
+
+		<ShadcnButton
+			v-show="showScrollTop"
+			@click="scrollToTop"
+			class="fixed bottom-5 right-5 z-40 rounded-lg border-2 border-gray-400  bg-gray-900/90 px-10 py-6 text-lg font-bold text-white shadow-lg shadow-gray-900/20 transition-opacity duration-300 hover:bg-gray-800"
+			aria-label="Scroll to top"
+		>
+			To top ↑
+		</ShadcnButton>
 	</div>
 </template>
 <style scoped>
