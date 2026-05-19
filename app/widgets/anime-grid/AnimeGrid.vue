@@ -8,6 +8,9 @@ import {
 	orderByOptions,
 } from "./model/selectOptions";
 
+const route = useRoute();
+const router = useRouter();
+
 const animeCompose = useAnime();
 const search = ref("");
 const isPending = ref(false);
@@ -23,7 +26,41 @@ const filters = ref({
 	max_score: "",
 });
 
+// Initialize filters from URL query params
+const initializeFiltersFromURL = () => {
+	const query = route.query;
+	filters.value = {
+		genres: (query.genres as string) || "",
+		limit: (query.limit as string) || "24",
+		rating: (query.rating as string) || "",
+		status: (query.status as string) || "",
+		type: (query.type as string) || "",
+		order_by: (query.order_by as string) || "popularity",
+		min_score: (query.min_score as string) || "",
+		max_score: (query.max_score as string) || "",
+	};
+	search.value = (query.q as string) || "";
+};
+
 const activeFilters = () => ({ ...filters.value, q: search.value });
+
+// Update URL when filters change
+const updateURL = () => {
+	const query: Record<string, any> = {};
+	
+	if (search.value) query.q = search.value;
+	if (filters.value.genres) query.genres = filters.value.genres;
+	if (filters.value.rating) query.rating = filters.value.rating;
+	if (filters.value.status) query.status = filters.value.status;
+	if (filters.value.type) query.type = filters.value.type;
+	if (filters.value.order_by && filters.value.order_by !== "popularity") {
+		query.order_by = filters.value.order_by;
+	}
+	if (filters.value.min_score) query.min_score = filters.value.min_score;
+	if (filters.value.max_score) query.max_score = filters.value.max_score;
+
+	router.replace({ query });
+};
 
 const { target } = useInfiniteScroll(() =>
 	animeCompose.getInfiniteList(activeFilters()),
@@ -47,6 +84,7 @@ onBeforeUnmount(() => {
 
 onBeforeMount(async () => {
 	try {
+		initializeFiltersFromURL();
 		isPending.value = true;
 		await animeCompose.getAnimeList(activeFilters());
 	} catch (error) {
@@ -58,6 +96,7 @@ onBeforeMount(async () => {
 
 const triggerSearch = useDebounce(() => {
 	animeCompose.resetAndSearch(activeFilters());
+	updateURL();
 }, 400);
 
 watch(search, triggerSearch);
@@ -66,6 +105,7 @@ watch(
 	filters,
 	() => {
 		animeCompose.resetAndSearch(activeFilters());
+		updateURL();
 	},
 	{ deep: true },
 );

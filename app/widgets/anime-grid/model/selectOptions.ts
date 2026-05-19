@@ -4,7 +4,7 @@ export const availableStatuses = [
 		label: "Airing",
 	},
 	{
-		value: "completed",
+		value: "complete",
 		label: "Completed",
 	},
 	{
