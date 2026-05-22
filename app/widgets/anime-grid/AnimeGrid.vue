@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useInfiniteScroll } from "@/shared/lib/useInfiniteScroll";
 import { useDebounce } from "@/shared/lib/useDebounce";
+import type { Anime } from "@/entities/interfaces/animeListTypes";
 import {
 	availableStatuses,
 	ratingOptions,
@@ -66,6 +67,8 @@ const { target } = useInfiniteScroll(() =>
 	animeCompose.getInfiniteList(activeFilters()),
 );
 
+
+
 const onScroll = () => {
 	showScrollTop.value = window.pageYOffset > 400;
 };
@@ -122,8 +125,12 @@ watch(
 			/>
 
 			<ShadcnSheet>
+				
 				<ShadcnSheetTrigger>
+					<div class="flex gap-5">
+					<button class="p-2 bg-white/50 rounded-md cursor-pointer">♡</button>
 					<div class="p-2 bg-white/50 rounded-md cursor-pointer">Filters</div>
+					</div>
 				</ShadcnSheetTrigger>
 
 				<ShadcnSheetContent>
@@ -224,21 +231,26 @@ watch(
 				class="pt-0 overflow-hidden cursor-pointer rounded-md transition-transform hover:scale-[1.02]"
 				:key="anime.mal_id"
 			>
+			
 				<div class="w-full md:aspect-2/3 overflow-hidden">
 					<img
 						:src="anime.images.jpg.large_image_url"
 						loading="lazy"
 						class="w-full h-full object-cover"
-					/>
+					/> 
 				</div>
 				<ShadcnCardContent class="p-2">
 					<p class="text-sm font-medium line-clamp-2">
 						{{ anime.title }}
 					</p>
-
+					
+					<div class="flex items-center justify-between mt-2">
 					<p class="text-xs text-muted-foreground">
 						⭐ {{ anime.score ?? "N/A" }}
 					</p>
+					<button>🤍</button>
+					</div>
+					
 				</ShadcnCardContent>
 			</ShadcnCard>
 		</div>
