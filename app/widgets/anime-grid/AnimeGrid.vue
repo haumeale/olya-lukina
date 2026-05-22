@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useInfiniteScroll } from "@/shared/lib/useInfiniteScroll";
 import { useDebounce } from "@/shared/lib/useDebounce";
-import type { Anime } from "@/entities/interfaces/animeListTypes";
+import { useFavoritesStore } from "~/features/favorites/model/favorites";
 import {
 	availableStatuses,
 	ratingOptions,
@@ -11,6 +11,12 @@ import {
 
 const route = useRoute();
 const router = useRouter();
+
+const favoritesStore = useFavoritesStore();
+
+const goToFavorites = () => {
+  router.push("/favorites");
+};
 
 const animeCompose = useAnime();
 const search = ref("");
@@ -125,12 +131,14 @@ watch(
 			/>
 
 			<ShadcnSheet>
-				
+				 <button
+    class="p-2 bg-white/50 rounded-md cursor-pointer"
+    @click="goToFavorites"
+  >
+    ♡
+  </button>
 				<ShadcnSheetTrigger>
-					<div class="flex gap-5">
-					<button class="p-2 bg-white/50 rounded-md cursor-pointer">♡</button>
 					<div class="p-2 bg-white/50 rounded-md cursor-pointer">Filters</div>
-					</div>
 				</ShadcnSheetTrigger>
 
 				<ShadcnSheetContent>
@@ -248,7 +256,9 @@ watch(
 					<p class="text-xs text-muted-foreground">
 						⭐ {{ anime.score ?? "N/A" }}
 					</p>
-					<button>🤍</button>
+					<button @click.stop="favoritesStore.toggleFavorite(anime)">{{ favoritesStore.isFavorite(anime.mal_id)
+      ? "❤️"
+      : "🤍" }}</button>
 					</div>
 					
 				</ShadcnCardContent>
