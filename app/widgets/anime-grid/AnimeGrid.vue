@@ -131,8 +131,11 @@ watch(
 			/>
 
 			<ShadcnSheet>
+				<div class="flex gap-5">
 				 <button
-    class="p-2 bg-white/50 rounded-md cursor-pointer"
+    class="p-2 bg-white/50 rounded-md cursor-pointer
+
+"
     @click="goToFavorites"
   >
     ♡
@@ -140,6 +143,7 @@ watch(
 				<ShadcnSheetTrigger>
 					<div class="p-2 bg-white/50 rounded-md cursor-pointer">Filters</div>
 				</ShadcnSheetTrigger>
+				</div>
 
 				<ShadcnSheetContent>
 					<ShadcnSheetHeader>
