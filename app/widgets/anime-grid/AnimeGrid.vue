@@ -15,7 +15,7 @@ const router = useRouter();
 const favoritesStore = useFavoritesStore();
 
 const goToFavorites = () => {
-  router.push("/favorites");
+	router.push("/favorites");
 };
 
 const animeCompose = useAnime();
@@ -54,7 +54,7 @@ const activeFilters = () => ({ ...filters.value, q: search.value });
 // Update URL when filters change
 const updateURL = () => {
 	const query: Record<string, any> = {};
-	
+
 	if (search.value) query.q = search.value;
 	if (filters.value.genres) query.genres = filters.value.genres;
 	if (filters.value.rating) query.rating = filters.value.rating;
@@ -73,8 +73,6 @@ const { target } = useInfiniteScroll(() =>
 	animeCompose.getInfiniteList(activeFilters()),
 );
 
-
-
 const onScroll = () => {
 	showScrollTop.value = window.pageYOffset > 400;
 };
@@ -91,7 +89,7 @@ onBeforeUnmount(() => {
 	window.removeEventListener("scroll", onScroll);
 });
 
-onBeforeMount(async () => {
+async function setupAnimeData() {
 	try {
 		initializeFiltersFromURL();
 		isPending.value = true;
@@ -101,7 +99,9 @@ onBeforeMount(async () => {
 	} finally {
 		isPending.value = false;
 	}
-});
+}
+
+onBeforeMount(setupAnimeData);
 
 const triggerSearch = useDebounce(() => {
 	animeCompose.resetAndSearch(activeFilters());
@@ -132,17 +132,15 @@ watch(
 
 			<ShadcnSheet>
 				<div class="flex gap-5">
-				 <button
-    class="p-2 bg-white/50 rounded-md cursor-pointer
-
-"
-    @click="goToFavorites"
-  >
-    ♡
-  </button>
-				<ShadcnSheetTrigger>
-					<div class="p-2 bg-white/50 rounded-md cursor-pointer">Filters</div>
-				</ShadcnSheetTrigger>
+					<button
+						class="p-2 bg-white/50 rounded-md cursor-pointer"
+						@click="goToFavorites"
+					>
+						♡
+					</button>
+					<ShadcnSheetTrigger>
+						<div class="p-2 bg-white/50 rounded-md cursor-pointer">Filters</div>
+					</ShadcnSheetTrigger>
 				</div>
 
 				<ShadcnSheetContent>
@@ -232,8 +230,13 @@ watch(
 			</ShadcnSheet>
 		</div>
 
-		<!-- LOADING -->
-		<p v-if="isPending" class="text-center text-sm">Loading...</p>
+		<!-- LOADING SKELETON -->
+		<div
+			v-if="isPending"
+			class="grid sm:grid-cols-1 md:grid-cols-4 lg:grid-cols-6 gap-4"
+		>
+			<AnimeCardSkeleton :count="Number(filters.limit) || 24" />
+		</div>
 
 		<!-- GRID -->
 		<div class="grid sm:grid-cols-1 md:grid-cols-4 lg:grid-cols-6 gap-4" v-else>
@@ -243,45 +246,43 @@ watch(
 				class="pt-0 overflow-hidden cursor-pointer rounded-md transition-transform hover:scale-[1.02]"
 				:key="anime.mal_id"
 			>
-			
 				<div class="w-full md:aspect-2/3 overflow-hidden">
 					<img
 						:src="anime.images.jpg.large_image_url"
 						loading="lazy"
 						class="w-full h-full object-cover"
-					/> 
+					/>
 				</div>
 				<ShadcnCardContent class="p-2">
 					<p class="text-sm font-medium line-clamp-2">
 						{{ anime.title }}
 					</p>
-					
+
 					<div class="flex items-center justify-between mt-2">
-					<p class="text-xs text-muted-foreground">
-						⭐ {{ anime.score ?? "N/A" }}
-					</p>
-					<button @click.stop="favoritesStore.toggleFavorite(anime)">{{ favoritesStore.isFavorite(anime.mal_id)
-      ? "❤️"
-      : "🤍" }}</button>
+						<p class="text-xs text-muted-foreground">
+							⭐ {{ anime.score ?? "N/A" }}
+						</p>
+						<button @click.stop="favoritesStore.toggleFavorite(anime)">
+							{{ favoritesStore.isFavorite(anime.mal_id) ? "❤️" : "🤍" }}
+						</button>
 					</div>
-					
 				</ShadcnCardContent>
 			</ShadcnCard>
 		</div>
 
-		<!-- infinite scroll trigger -->
-		<p
+		<!-- infinite scroll skeleton -->
+		<div
 			v-if="animeCompose.isLoading.value && animeCompose.list.value.length"
-			class="text-center text-sm"
+			class="grid sm:grid-cols-1 md:grid-cols-4 lg:grid-cols-6 gap-4"
 		>
-			Loading more...
-		</p>
+			<AnimeCardSkeleton :count="6" />
+		</div>
 		<div ref="target" class="h-10"></div>
 
 		<ShadcnButton
 			v-show="showScrollTop"
 			@click="scrollToTop"
-			class="fixed bottom-5 right-5 z-40 rounded-lg border-2 border-gray-400  bg-gray-900/90 px-10 py-6 text-lg font-bold text-white shadow-lg shadow-gray-900/20 transition-opacity duration-300 hover:bg-gray-800"
+			class="fixed bottom-5 right-5 z-40 rounded-lg border-2 border-gray-400 bg-gray-900/90 px-10 py-6 text-lg font-bold text-white shadow-lg shadow-gray-900/20 transition-opacity duration-300 hover:bg-gray-800"
 			aria-label="Scroll to top"
 		>
 			To top ↑
