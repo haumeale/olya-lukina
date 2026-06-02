@@ -19,10 +19,12 @@ const goToFavorites = () => {
 };
 
 const animeCompose = useAnime();
+
 const search = ref("");
 const isPending = ref(false);
 const showScrollTop = ref(false);
-const filters = ref({
+
+const DEFAULT_FILTERS = {
 	genres: "",
 	limit: "24",
 	rating: "",
@@ -31,40 +33,53 @@ const filters = ref({
 	order_by: "popularity",
 	min_score: "",
 	max_score: "",
+};
+
+const filters = ref({ ...DEFAULT_FILTERS });
+
+const activeFilters = () => ({
+	...filters.value,
+	q: search.value,
 });
 
-// Initialize filters from URL query params
+
+// убираем пустые и дефолтные значения
+const buildQuery = (data: Record<string, any>) => {
+	return Object.fromEntries(
+		Object.entries(data).filter(([key, value]) => {
+			if (!value) return false;
+
+			const defaultValue = DEFAULT_FILTERS[key as keyof typeof DEFAULT_FILTERS];
+
+			if (defaultValue !== undefined && value === defaultValue) {
+				return false;
+			}
+
+			return true;
+		}),
+	);
+};
+
+// URL -> state
 const initializeFiltersFromURL = () => {
 	const query = route.query;
+
 	filters.value = {
-		genres: (query.genres as string) || "",
-		limit: (query.limit as string) || "24",
-		rating: (query.rating as string) || "",
-		status: (query.status as string) || "",
-		type: (query.type as string) || "",
-		order_by: (query.order_by as string) || "popularity",
-		min_score: (query.min_score as string) || "",
-		max_score: (query.max_score as string) || "",
+		...DEFAULT_FILTERS,
+		...Object.fromEntries(
+			Object.entries(query).filter(([key]) => key !== "q"),
+		),
 	};
+
 	search.value = (query.q as string) || "";
 };
 
-const activeFilters = () => ({ ...filters.value, q: search.value });
-
-// Update URL when filters change
+// state -> URL
 const updateURL = () => {
-	const query: Record<string, any> = {};
-
-	if (search.value) query.q = search.value;
-	if (filters.value.genres) query.genres = filters.value.genres;
-	if (filters.value.rating) query.rating = filters.value.rating;
-	if (filters.value.status) query.status = filters.value.status;
-	if (filters.value.type) query.type = filters.value.type;
-	if (filters.value.order_by && filters.value.order_by !== "popularity") {
-		query.order_by = filters.value.order_by;
-	}
-	if (filters.value.min_score) query.min_score = filters.value.min_score;
-	if (filters.value.max_score) query.max_score = filters.value.max_score;
+	const query = buildQuery({
+		...filters.value,
+		q: search.value,
+	});
 
 	router.replace({ query });
 };
@@ -101,8 +116,19 @@ async function setupAnimeData() {
 	}
 }
 
+const resetFilters = async () => {
+	
+	filters.value = { ...DEFAULT_FILTERS };
+	search.value = "";
+
+	router.replace({ query: {} });
+
+	await animeCompose.resetAndSearch(activeFilters());
+};
+
 onBeforeMount(setupAnimeData);
 
+// search debounce
 const triggerSearch = useDebounce(() => {
 	animeCompose.resetAndSearch(activeFilters());
 	updateURL();
@@ -110,6 +136,7 @@ const triggerSearch = useDebounce(() => {
 
 watch(search, triggerSearch);
 
+// filters change
 watch(
 	filters,
 	() => {
@@ -145,8 +172,16 @@ watch(
 
 				<ShadcnSheetContent>
 					<ShadcnSheetHeader>
+						<div>
 						<ShadcnSheetTitle>Filters</ShadcnSheetTitle>
 						<ShadcnSheetDescription> Фильтрация аниме </ShadcnSheetDescription>
+						</div>
+						<ShadcnButton
+		                   class="text-sm m-5 bg-neutral-900 hover:bg-neutral-800 text-red-500 hover:text-red-600 "
+		                   @click="resetFilters"
+	                    >
+		                    Reset
+	                    </ShadcnButton>
 					</ShadcnSheetHeader>
 
 					<div class="w-full flex flex-col items-center gap-4 px-5">
